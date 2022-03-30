@@ -1,0 +1,10 @@
+body {
+    margin: 0;
+}
+
+.map-container {
+    height: 100vh;
+    display: block;
+    /* display: grid;
+    grid-template-rows: auto 90% 10%; */
+}
