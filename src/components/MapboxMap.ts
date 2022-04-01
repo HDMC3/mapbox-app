@@ -10,6 +10,20 @@ class MapboxMap extends HTMLElement {
             center: [-90.513604, 14.641601], // [lon, lat]
             zoom: 9
         });
+
+        const nav = new mapboxgl.NavigationControl();
+        map.addControl(nav, 'top-right');
+
+        const scale = new mapboxgl.ScaleControl({
+            maxWidth: 100,
+            unit: 'imperial'
+        });
+        map.addControl(scale, 'bottom-right');
+
+        scale.setUnit('metric');
+
+        map.addControl(new mapboxgl.FullscreenControl({ container: document.querySelector('body') }));
+
     }
 };
 
