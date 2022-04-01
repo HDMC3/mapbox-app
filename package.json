@@ -21,6 +21,7 @@
     "vite": "^2.8.0"
   },
   "dependencies": {
+    "@mapbox/mapbox-gl-geocoder": "^5.0.0",
     "mapbox-gl": "^2.7.1"
   }
 }
