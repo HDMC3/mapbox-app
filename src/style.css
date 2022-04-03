@@ -1,4 +1,11 @@
+@font-face {
+	font-family: 'Montserrat Thin';
+	src: url("fonts/Montserrat-VariableFont_wght.ttf") format("truetype");
+	font-display: swap;
+}
+
 body {
+    font-family: 'Montserrat Thin', sans-serif;
     margin: 0;
 }
 
