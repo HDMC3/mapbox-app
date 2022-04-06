@@ -24,6 +24,7 @@ export class MapMarkerModal extends HTMLElement {
         setTimeout(() => {
             this.shadowRoot?.querySelector('.modal-container')?.classList.add('fade-in');
             this.backdropModal?.classList.add('fade-in');
+            this.inputMarkerName?.focus();
         }, 100);
     }
 
@@ -102,13 +103,13 @@ export class MapMarkerModal extends HTMLElement {
             justify-content: center;
             height: 100vh;
             width: 100vw;
+            z-index: 3;
         }
         
         .modal-container {
             position: absolute;
             background-color: #FFF;
             border-radius: 15px;
-            z-index: 4;
             width: 40%;
             overflow: hidden;
             opacity: 0;
@@ -316,7 +317,7 @@ export class MapMarkerModal extends HTMLElement {
                 <div class="modal-content">
                     <form>
                         <label for="marker-name">Nombre:</label>
-                        <input id="marker-name" value="">
+                        <input id="marker-name" autocomplete="off" value="">
                         <span class="invalid-text">El nombre es requerido</span>
                     </form>
                 </div>

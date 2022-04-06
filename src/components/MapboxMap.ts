@@ -1,10 +1,12 @@
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { Marker } from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { MapMarkerModal } from './MapMarkerModal';
+import { MapboxSearchBar } from './MapboxSearchBar';
 
 class MapboxMap extends HTMLElement {
     map: mapboxgl.Map;
+    flyToMarker: Marker;
 
     constructor() {
         super();
@@ -16,10 +18,11 @@ class MapboxMap extends HTMLElement {
             center: [-90.51332543227954, 14.64193046063697],
             zoom: 17,
             pitch: 0,
-            bearing: -17.6,
             antialias: true,
             doubleClickZoom: false
         });
+
+        this.flyToMarker = new mapboxgl.Marker({ color: '#EA2027' });
     }
 
     connectedCallback() {
@@ -42,7 +45,22 @@ class MapboxMap extends HTMLElement {
                 mapboxgl: mapboxgl
             });
 
-            this.map.addControl(geocoder, 'top-right');
+            // this.map.addControl(geocoder, 'top-right');
+
+            document.getElementById('main-container')?.insertAdjacentElement('afterbegin', new MapboxSearchBar(geocoder));
+
+            geocoder.on('result', (e) => {
+                this.flyToMarker
+                    .setLngLat(e.result.center)
+                    .addTo(this.map);
+                this.map.flyTo({
+                    center: e.result.center
+                });
+            });
+
+            geocoder.on('clear', () => {
+                this.flyToMarker.remove();
+            });
 
             const nav = new mapboxgl.NavigationControl();
             this.map.addControl(nav, 'top-right');
@@ -120,6 +138,7 @@ class MapboxMap extends HTMLElement {
         const modal = new MapMarkerModal(marker, this.map);
         this.insertAdjacentElement('beforeend', modal);
     }
+
 };
 
 customElements.define('mapbox-map', MapboxMap);
