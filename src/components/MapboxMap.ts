@@ -1,12 +1,15 @@
-import mapboxgl, { Marker } from 'mapbox-gl';
+import mapboxgl, { Marker, Popup } from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import { MapMarkerModal } from './MapMarkerModal';
+import { MapboxMarkerModal } from './MapboxMarkerModal';
 import { MapboxSearchBar } from './MapboxSearchBar';
+import { MapMarker } from '../interfaces/map-marker.interfce';
 
 class MapboxMap extends HTMLElement {
     map: mapboxgl.Map;
     flyToMarker: Marker;
+    userMarker: Marker;
+    markers: MapMarker[] = [];
 
     constructor() {
         super();
@@ -15,18 +18,40 @@ class MapboxMap extends HTMLElement {
         this.map = new mapboxgl.Map({
             container: this,
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [-90.51332543227954, 14.64193046063697],
+            // center: [-90.51332543227954, 14.64193046063697],
             zoom: 17,
             pitch: 0,
             antialias: true,
             doubleClickZoom: false
         });
 
-        this.flyToMarker = new mapboxgl.Marker({ color: '#EA2027' });
+        this.userMarker = new Marker();
+
+        navigator.geolocation.getCurrentPosition((data) => {
+            const latitude = data.coords.latitude;
+            const longitude = data.coords.longitude;
+
+            localStorage.setItem('user-marker', JSON.stringify({ lat: latitude, lng: longitude }));
+
+            this.map.setCenter(new mapboxgl.LngLat(longitude, latitude));
+
+            this.userMarker
+                .setLngLat([longitude, latitude])
+                .setPopup(
+                    new Popup({ closeButton: false, className: 'shadow-popup' })
+                        .setHTML('<h3 style="margin: 0;">Mi ubicacion</h3>')
+                )
+                .addTo(this.map)
+                .getElement().style.opacity = '0';
+        });
+
+        this.flyToMarker = new mapboxgl.Marker({ color: '#646464' });
     }
 
     connectedCallback() {
         this.map.on('load', () => {
+
+            this.initMarkers();
 
             this.add3DBuildings(this.map);
 
@@ -40,12 +65,12 @@ class MapboxMap extends HTMLElement {
                 }
             });
 
+            this.userMarker.getElement().style.opacity = '1';
+
             const geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl
             });
-
-            // this.map.addControl(geocoder, 'top-right');
 
             document.getElementById('main-container')?.insertAdjacentElement('afterbegin', new MapboxSearchBar(geocoder));
 
@@ -62,22 +87,36 @@ class MapboxMap extends HTMLElement {
                 this.flyToMarker.remove();
             });
 
-            const nav = new mapboxgl.NavigationControl();
-            this.map.addControl(nav, 'top-right');
+            const navControl = new mapboxgl.NavigationControl();
+            this.map.addControl(navControl, 'top-right');
 
-            const scale = new mapboxgl.ScaleControl({
+            const scaleControl = new mapboxgl.ScaleControl({
                 maxWidth: 100,
                 unit: 'imperial'
             });
-            this.map.addControl(scale, 'bottom-right');
+            this.map.addControl(scaleControl, 'bottom-right');
 
-            scale.setUnit('metric');
+            scaleControl.setUnit('metric');
 
             this.map.addControl(new mapboxgl.FullscreenControl({ container: document.querySelector('body') }));
 
-            this.map.on('click', (_) => {
-                // console.log(e);
+            const geolocateControl = new mapboxgl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                trackUserLocation: false,
+                showUserHeading: false,
+                showUserLocation: false,
+                showAccuracyCircle: false,
+                fitBoundsOptions: {
+                    zoom: 15
+                }
             });
+
+            this.map.addControl(
+                geolocateControl,
+                'top-right'
+            );
 
             this.map.on('dblclick', e => {
                 this.addMarker(e.lngLat.lat, e.lngLat.lng);
@@ -135,8 +174,33 @@ class MapboxMap extends HTMLElement {
             .setLngLat([longitude, latitude])
             .addTo(this.map);
 
-        const modal = new MapMarkerModal(marker, this.map);
+        const modal = new MapboxMarkerModal(marker, this.map, this.markers);
         this.insertAdjacentElement('beforeend', modal);
+    }
+
+    initMarkers() {
+        const localStorageMarkersValue = localStorage.getItem('marker-list');
+
+        if (!localStorageMarkersValue) return;
+
+        const localStorageMarkers: MapMarker[] = JSON.parse(localStorageMarkersValue);
+
+        this.markers = localStorageMarkers
+            .map(m => {
+                const popupElement = document.createElement('h3');
+                popupElement.style.margin = '0';
+                popupElement.textContent = m.name;
+
+                m.mapboxMarker = new Marker({ color: '#EA2027' })
+                    .setLngLat([m.longitude, m.latitude])
+                    .setPopup(
+                        new Popup({ closeButton: false, className: 'shadow-popup' })
+                            .setDOMContent(popupElement)
+                    )
+                    .addTo(this.map);
+
+                return m;
+            });
     }
 
 };

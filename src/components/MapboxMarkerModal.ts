@@ -1,8 +1,7 @@
 import { Marker, Map, Popup } from 'mapbox-gl';
 import { MapMarker } from '../interfaces/map-marker.interfce';
-import { MapsApp } from './MapsApp';
 
-export class MapMarkerModal extends HTMLElement {
+export class MapboxMarkerModal extends HTMLElement {
 
     marker: Marker;
     map: Map;
@@ -11,12 +10,14 @@ export class MapMarkerModal extends HTMLElement {
     backdropModal?: HTMLElement | null;
     markerForm?: HTMLFormElement | null;
     inputMarkerName?: HTMLInputElement | null;
+    mapboxMarkerList: MapMarker[];
 
-    constructor(marker: Marker, map: Map) {
+    constructor(marker: Marker, map: Map, mapboxMarkerList: MapMarker[]) {
         super();
         this.attachShadow({ mode: 'open' });
         this.marker = marker;
         this.map = map;
+        this.mapboxMarkerList = mapboxMarkerList;
     }
 
     connectedCallback() {
@@ -43,32 +44,63 @@ export class MapMarkerModal extends HTMLElement {
 
         if (!this.inputMarkerName) return;
 
-        if (this.inputMarkerName.value.replace(/\s/g, '').length !== 0) {
-            const markerName = this.inputMarkerName.value.trim();
+        const markerName = this.inputMarkerName.value.trim();
 
-            const popupElement = document.createElement('h2');
-            popupElement.style.margin = '0';
-            popupElement.textContent = markerName;
-            this.marker.setPopup(
-                new Popup({ closeButton: false, className: 'shadow-popup' })
-                    .setDOMContent(popupElement)
-            );
-
-            const newMarker: MapMarker = {
-                name: markerName,
-                latitude: this.marker.getLngLat().lat,
-                longitude: this.marker.getLngLat().lng
-            };
-
-            MapsApp.markerList.push(newMarker);
-            localStorage.setItem('marker-list', JSON.stringify(MapsApp.markerList));
-            this.inputMarkerName.removeEventListener('keyup', this.checkInvalidInput);
-            this.remove();
-        } else {
+        if (this.inputMarkerName.value.replace(/\s/g, '').length === 0) {
             this.inputMarkerName.classList.add('invalid-marker-name');
             this.markerForm.querySelector('.invalid-text')?.classList.add('show-invalid-text');
+            this.markerForm.querySelector('.invalid-text')!.textContent = 'El nombre es requerido';
             this.inputMarkerName.addEventListener('keyup', this.checkInvalidInput);
+            return;
         }
+
+        if (this.checkMarkerExists(markerName)) {
+            this.inputMarkerName.removeEventListener('keyup', this.checkInvalidInput);
+            this.inputMarkerName.classList.add('invalid-marker-name');
+            this.markerForm.querySelector('.invalid-text')?.classList.add('show-invalid-text');
+            this.markerForm.querySelector('.invalid-text')!.textContent = 'Ya existe un marcador con el mismo nombre';
+            return;
+        }
+
+        const popupElement = document.createElement('h3');
+        popupElement.style.margin = '0';
+        popupElement.textContent = markerName;
+        this.marker.setPopup(
+            new Popup({ closeButton: false, className: 'shadow-popup' })
+                .setDOMContent(popupElement)
+        );
+
+        const newMarker: MapMarker = {
+            name: markerName,
+            latitude: this.marker.getLngLat().lat,
+            longitude: this.marker.getLngLat().lng,
+            mapboxMarker: this.marker
+        };
+
+        this.mapboxMarkerList.push(newMarker);
+
+        const updatedMarkerList = this.mapboxMarkerList.map(el => {
+            return {
+                name: el.name,
+                latitude: el.latitude,
+                longitude: el.longitude
+            };
+        });
+
+        localStorage.setItem('marker-list', JSON.stringify(updatedMarkerList));
+
+        this.inputMarkerName.removeEventListener('keyup', this.checkInvalidInput);
+        this.remove();
+    }
+
+    checkMarkerExists(name: string) {
+        const markerListSTR = localStorage.getItem('marker-list');
+
+        if (!markerListSTR) return false;
+
+        const markerList: MapMarker[] = JSON.parse(markerListSTR);
+
+        return markerList.some((marker) => marker.name.toLowerCase() === name.toLowerCase());
     }
 
     cancelSaveMarker = () => {
@@ -343,4 +375,4 @@ export class MapMarkerModal extends HTMLElement {
 
 }
 
-customElements.define('map-marker-modal', MapMarkerModal);
+customElements.define('map-marker-modal', MapboxMarkerModal);
