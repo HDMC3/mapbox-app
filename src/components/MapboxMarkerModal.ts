@@ -18,6 +18,7 @@ export class MapboxMarkerModal extends HTMLElement {
         this.marker = marker;
         this.map = map;
         this.mapboxMarkerList = mapboxMarkerList;
+        document.addEventListener('focusin', this.removeFocusGeocoder);
     }
 
     connectedCallback() {
@@ -25,7 +26,6 @@ export class MapboxMarkerModal extends HTMLElement {
         setTimeout(() => {
             this.shadowRoot?.querySelector('.modal-container')?.classList.add('fade-in');
             this.backdropModal?.classList.add('fade-in');
-            this.inputMarkerName?.focus();
         }, 100);
     }
 
@@ -35,6 +35,13 @@ export class MapboxMarkerModal extends HTMLElement {
         this.inputMarkerName?.removeEventListener('keyup', this.checkInvalidInput);
         this.cancelButton?.removeEventListener('click', this.cancelSaveMarker);
         this.backdropModal?.removeEventListener('click', this.cancelSaveMarker);
+        document.removeEventListener('focusin', this.removeFocusGeocoder);
+    }
+
+    removeFocusGeocoder(e: any) {
+        if (e.target.classList.contains('mapboxgl-ctrl-geocoder--input')) {
+            e.target.blur();
+        }
     }
 
     saveMarker = (e: any) => {

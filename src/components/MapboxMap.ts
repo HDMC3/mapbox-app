@@ -4,12 +4,16 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { MapboxMarkerModal } from './MapboxMarkerModal';
 import { MapboxSearchBar } from './MapboxSearchBar';
 import { MapMarker } from '../interfaces/map-marker.interfce';
+import { MapboxMarkerList } from './MapboxMarkerList';
 
 class MapboxMap extends HTMLElement {
     map: mapboxgl.Map;
     flyToMarker: Marker;
     userMarker: Marker;
     markers: MapMarker[] = [];
+
+    mapboxMarkerListElement?: MapboxMarkerList | null;
+    mapboxSearchBarElement: MapboxSearchBar;
 
     constructor() {
         super();
@@ -18,7 +22,6 @@ class MapboxMap extends HTMLElement {
         this.map = new mapboxgl.Map({
             container: this,
             style: 'mapbox://styles/mapbox/streets-v11',
-            // center: [-90.51332543227954, 14.64193046063697],
             zoom: 17,
             pitch: 0,
             antialias: true,
@@ -41,11 +44,10 @@ class MapboxMap extends HTMLElement {
                     new Popup({ closeButton: false, className: 'shadow-popup' })
                         .setHTML('<h3 style="margin: 0;">Mi ubicacion</h3>')
                 )
-                .addTo(this.map)
-                .getElement().style.opacity = '0';
+                .addTo(this.map);
         });
 
-        this.flyToMarker = new mapboxgl.Marker({ color: '#646464' });
+        this.flyToMarker = new mapboxgl.Marker({ color: '#fbc531' });
     }
 
     connectedCallback() {
@@ -65,14 +67,13 @@ class MapboxMap extends HTMLElement {
                 }
             });
 
-            this.userMarker.getElement().style.opacity = '1';
-
             const geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl
             });
 
-            document.getElementById('main-container')?.insertAdjacentElement('afterbegin', new MapboxSearchBar(geocoder));
+            this.mapboxSearchBarElement = new MapboxSearchBar(geocoder);
+            this.insertAdjacentElement('afterbegin', this.mapboxSearchBarElement);
 
             geocoder.on('result', (e) => {
                 this.flyToMarker
@@ -123,8 +124,13 @@ class MapboxMap extends HTMLElement {
                 geocoder.clear();
             });
 
+            this.addEventListener('show-marker-list', this.toggleListMarkers);
         });
 
+    }
+
+    disconnectedCallback() {
+        this.removeEventListener('show-marker-list', this.toggleListMarkers);
     }
 
     add3DBuildings(map: mapboxgl.Map) {
@@ -167,6 +173,19 @@ class MapboxMap extends HTMLElement {
             labelLayerId
         );
 
+    }
+
+    toggleListMarkers = (e: any) => {
+        if (e.detail.showMarkerList) {
+            this.mapboxMarkerListElement = new MapboxMarkerList(this.markers, this.map, this.mapboxSearchBarElement, this.userMarker);
+            document.getElementById('main-container')?.insertAdjacentElement('beforeend', this.mapboxMarkerListElement);
+        } else {
+            this.mapboxMarkerListElement?.shadowRoot?.querySelector('.marker-list-container')?.classList.remove('show-list');
+            setTimeout(() => {
+                this.mapboxMarkerListElement?.remove();
+                this.mapboxMarkerListElement = null;
+            }, 100);
+        }
     }
 
     addMarker(latitude: number, longitude: number) {

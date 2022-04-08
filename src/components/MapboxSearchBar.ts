@@ -3,6 +3,7 @@ import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 export class MapboxSearchBar extends HTMLElement {
     private geocoderControl: MapboxGeocoder;
     private markerListButton?: HTMLElement | null;
+    private geocoderControlInput?: HTMLInputElement | null;
 
     constructor(geocoderControl: MapboxGeocoder) {
         super();
@@ -21,15 +22,24 @@ export class MapboxSearchBar extends HTMLElement {
             geocoder.style.maxWidth = 'unset';
             geocoder.style.minWidth = 'unset';
 
-            const geocoderInput = geocoder.querySelector('input');
-            if (geocoderInput) {
-                geocoderInput.style.outline = 'none';
+            this.geocoderControlInput = geocoder.querySelector('input');
+            if (this.geocoderControlInput) {
+                this.geocoderControlInput.style.outline = 'none';
+                this.geocoderControlInput.addEventListener('focus', this.onfocusGeocoderControlInputHandler);
             }
         }
+
     }
 
     disconnectedCallback() {
         this.markerListButton?.removeEventListener('click', this.showMakerList);
+        this.geocoderControlInput?.removeEventListener('focus', this.onfocusGeocoderControlInputHandler);
+    }
+
+    onfocusGeocoderControlInputHandler = () => {
+        if (this.markerListButton?.classList.contains('show')) {
+            this.showMakerList();
+        }
     }
 
     showMakerList = () => {
