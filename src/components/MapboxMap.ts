@@ -14,6 +14,7 @@ class MapboxMap extends HTMLElement {
     userMarker: Marker;
     markers: MapMarker[] = [];
     renderCheck = false;
+    geocoder: MapboxGeocoder;
 
     mapboxMarkerListElement?: MapboxMarkerList | null;
     mapboxSearchBarElement: MapboxSearchBar;
@@ -50,129 +51,170 @@ class MapboxMap extends HTMLElement {
                 .addTo(this.map);
         });
 
+        this.geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+
+        this.mapboxSearchBarElement = new MapboxSearchBar(this.geocoder);
+
         this.flyToMarker = new mapboxgl.Marker({ color: '#fbc531' });
     }
 
     connectedCallback() {
-        this.map.on('load', () => {
-
-            this.initMarkers();
-
-            const geocoder = new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl
-            });
-
-            this.mapboxSearchBarElement = new MapboxSearchBar(geocoder);
-            this.insertAdjacentElement('afterbegin', this.mapboxSearchBarElement);
-
-            geocoder.on('result', (e) => {
-                this.flyToMarker
-                    .setLngLat(e.result.center)
-                    .addTo(this.map);
-                this.map.flyTo({
-                    center: e.result.center
-                });
-            });
-
-            geocoder.on('clear', () => {
-                this.flyToMarker.remove();
-            });
-
-            const navControl = new mapboxgl.NavigationControl();
-            this.map.addControl(navControl, 'top-right');
-
-            const scaleControl = new mapboxgl.ScaleControl({
-                maxWidth: 100,
-                unit: 'imperial'
-            });
-            this.map.addControl(scaleControl, 'bottom-right');
-
-            scaleControl.setUnit('metric');
-
-            this.map.addControl(new mapboxgl.FullscreenControl({ container: document.querySelector('body') }));
-
-            const geolocateControl = new mapboxgl.GeolocateControl({
-                positionOptions: {
-                    enableHighAccuracy: true
-                },
-                trackUserLocation: false,
-                showUserHeading: false,
-                showUserLocation: false,
-                showAccuracyCircle: false,
-                fitBoundsOptions: {
-                    zoom: 15
-                }
-            });
-
-            this.map.addControl(
-                geolocateControl,
-                'top-right'
-            );
-
-            const styles: MapboxStyleDefinition[] = [
-                {
-                    title: 'Dark',
-                    uri: 'mapbox://styles/mapbox/dark-v9'
-                },
-                {
-                    title: 'Light',
-                    uri: 'mapbox://styles/mapbox/light-v9'
-                },
-                {
-                    title: 'Outdoors',
-                    uri: 'mapbox://styles/mapbox/outdoors-v11'
-                },
-                {
-                    title: 'Satellite',
-                    uri: 'mapbox://styles/mapbox/satellite-v9'
-                },
-                {
-                    title: 'Streets',
-                    uri: 'mapbox://styles/mapbox/streets-v11'
-                },
-                {
-                    title: 'Navigation Day',
-                    uri: 'mapbox://styles/mapbox/navigation-day-v1'
-                },
-                {
-                    title: 'Navigation Night',
-                    uri: 'mapbox://styles/mapbox/navigation-night-v1'
-                }
-            ];
-
-            const styleSwitcherControl = new MapboxStyleSwitcherControl(styles,
-                {
-                    defaultStyle: 'Streets',
-                    eventListeners: {
-                        onChange: (_, style: string) => {
-                            this.renderCheck = style !== 'mapbox://styles/mapbox/dark-v9' &&
-                                style !== 'mapbox://styles/mapbox/light-v9' &&
-                                style !== 'mapbox://styles/mapbox/streets-v11';
-
-                            return false;
-                        }
-                    }
-                }
-            );
-            this.map.addControl(styleSwitcherControl, 'top-right');
-
-            this.map.on('dblclick', e => {
-                this.addMarker(e.lngLat.lat, e.lngLat.lng);
-                geocoder.clear();
-            });
-
-            this.map.on('render', this.onMapRenderHandler);
-
-            this.addEventListener('show-marker-list', this.toggleListMarkers);
-        });
-
+        this.map.on('load', this.onMapLoadHandler);
     }
 
     disconnectedCallback() {
         this.removeEventListener('show-marker-list', this.toggleListMarkers);
+        this.map.off('load', this.onMapLoadHandler);
         this.map.off('render', this.onMapRenderHandler);
+        this.map.off('dblclick', this.onMapDoubleClickHandler);
+        this.geocoder.off('result', this.onGeocoderResultHandler);
+        this.geocoder.off('clear', this.onGeocoderClearHandler);
     }
+
+    onMapLoadHandler = () => {
+        this.initMarkers();
+
+        this.insertAdjacentElement('afterbegin', this.mapboxSearchBarElement);
+
+        this.geocoder.on('result', this.onGeocoderResultHandler);
+
+        this.geocoder.on('clear', this.onGeocoderClearHandler);
+
+        const navControl = new mapboxgl.NavigationControl();
+        this.map.addControl(navControl, 'top-right');
+
+        const scaleControl = new mapboxgl.ScaleControl({
+            maxWidth: 100,
+            unit: 'imperial'
+        });
+        this.map.addControl(scaleControl, 'bottom-right');
+
+        scaleControl.setUnit('metric');
+
+        this.map.addControl(new mapboxgl.FullscreenControl({ container: document.querySelector('body') }));
+
+        const geolocateControl = new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: false,
+            showUserHeading: false,
+            showUserLocation: false,
+            showAccuracyCircle: false,
+            fitBoundsOptions: {
+                zoom: 15
+            }
+        });
+
+        this.map.addControl(
+            geolocateControl,
+            'top-right'
+        );
+
+        const styles: MapboxStyleDefinition[] = [
+            {
+                title: 'Navigation Night',
+                uri: 'mapbox://styles/mapbox/navigation-night-v1'
+            },
+            {
+                title: 'Navigation Day',
+                uri: 'mapbox://styles/mapbox/navigation-day-v1'
+            },
+            {
+                title: 'Satellite',
+                uri: 'mapbox://styles/mapbox/satellite-v9'
+            },
+            {
+                title: 'Outdoors',
+                uri: 'mapbox://styles/mapbox/outdoors-v11'
+            },
+            {
+                title: 'Streets',
+                uri: 'mapbox://styles/mapbox/streets-v11'
+            },
+            {
+                title: 'Light',
+                uri: 'mapbox://styles/mapbox/light-v9'
+            },
+            {
+                title: 'Dark',
+                uri: 'mapbox://styles/mapbox/dark-v9'
+            }
+        ];
+
+        const styleSwitcherControl = new MapboxStyleSwitcherControl(styles,
+            {
+                defaultStyle: 'Streets',
+                eventListeners: {
+                    onChange: (_, style: string) => {
+                        this.renderCheck = style !== 'mapbox://styles/mapbox/dark-v9' &&
+                            style !== 'mapbox://styles/mapbox/light-v9' &&
+                            style !== 'mapbox://styles/mapbox/streets-v11';
+
+                        return false;
+                    }
+                }
+            }
+        );
+
+        this.map.addControl(styleSwitcherControl, 'top-right');
+
+        this.map.on('dblclick', this.onMapDoubleClickHandler);
+
+        this.map.on('render', this.onMapRenderHandler);
+
+        this.addEventListener('show-marker-list', this.toggleListMarkers);
+    }
+
+    initMarkers() {
+        const localStorageMarkersValue = localStorage.getItem('marker-list');
+
+        if (!localStorageMarkersValue) return;
+
+        const localStorageMarkers: MapMarker[] = JSON.parse(localStorageMarkersValue);
+
+        this.markers = localStorageMarkers
+            .map(m => {
+                const popupElement = document.createElement('h3');
+                popupElement.style.margin = '0';
+                popupElement.textContent = m.name;
+
+                m.mapboxMarker = new Marker({ color: '#EA2027' })
+                    .setLngLat([m.longitude, m.latitude])
+                    .setPopup(
+                        new Popup({ closeButton: false, className: 'shadow-popup' })
+                            .setDOMContent(popupElement)
+                    )
+                    .addTo(this.map);
+
+                return m;
+            });
+    }
+
+    onGeocoderResultHandler = (e: any) => {
+        this.flyToMarker
+            .setLngLat(e.result.center)
+            .addTo(this.map);
+        this.map.flyTo({
+            center: e.result.center
+        });
+    }
+
+    onGeocoderClearHandler = () => {
+        this.flyToMarker.remove();
+    }
+
+    onMapRenderHandler = () => {
+        if (!this.renderCheck) {
+            this.add3DBuildings(this.map);
+            this.addSkyLayer(this.map);
+            this.renderCheck = true;
+        }
+    }
+
 
     add3DBuildings(map: mapboxgl.Map) {
         const layers = map.getStyle().layers;
@@ -228,12 +270,18 @@ class MapboxMap extends HTMLElement {
         });
     }
 
-    onMapRenderHandler = () => {
-        if (!this.renderCheck) {
-            this.add3DBuildings(this.map);
-            this.addSkyLayer(this.map);
-            this.renderCheck = true;
-        }
+    onMapDoubleClickHandler = (e: any) => {
+        this.addMarker(e.lngLat.lat, e.lngLat.lng);
+        this.geocoder.clear();
+    }
+
+    addMarker(latitude: number, longitude: number) {
+        const marker = new mapboxgl.Marker({ color: '#EA2027' })
+            .setLngLat([longitude, latitude])
+            .addTo(this.map);
+
+        const modal = new MapboxMarkerModal(marker, this.map, this.markers);
+        this.insertAdjacentElement('beforeend', modal);
     }
 
     toggleListMarkers = (e: any) => {
@@ -248,41 +296,6 @@ class MapboxMap extends HTMLElement {
             }, 100);
         }
     }
-
-    addMarker(latitude: number, longitude: number) {
-        const marker = new mapboxgl.Marker({ color: '#EA2027' })
-            .setLngLat([longitude, latitude])
-            .addTo(this.map);
-
-        const modal = new MapboxMarkerModal(marker, this.map, this.markers);
-        this.insertAdjacentElement('beforeend', modal);
-    }
-
-    initMarkers() {
-        const localStorageMarkersValue = localStorage.getItem('marker-list');
-
-        if (!localStorageMarkersValue) return;
-
-        const localStorageMarkers: MapMarker[] = JSON.parse(localStorageMarkersValue);
-
-        this.markers = localStorageMarkers
-            .map(m => {
-                const popupElement = document.createElement('h3');
-                popupElement.style.margin = '0';
-                popupElement.textContent = m.name;
-
-                m.mapboxMarker = new Marker({ color: '#EA2027' })
-                    .setLngLat([m.longitude, m.latitude])
-                    .setPopup(
-                        new Popup({ closeButton: false, className: 'shadow-popup' })
-                            .setDOMContent(popupElement)
-                    )
-                    .addTo(this.map);
-
-                return m;
-            });
-    }
-
 };
 
 customElements.define('mapbox-map', MapboxMap);
