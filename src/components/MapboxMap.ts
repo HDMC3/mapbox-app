@@ -29,7 +29,8 @@ class MapboxMap extends HTMLElement {
             zoom: 17,
             pitch: 0,
             antialias: true,
-            doubleClickZoom: false
+            doubleClickZoom: false,
+            touchPitch: true
         });
 
         this.userMarker = new Marker();
