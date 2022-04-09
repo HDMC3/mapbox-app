@@ -1,6 +1,8 @@
 import mapboxgl, { Marker, Popup } from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import { MapboxStyleDefinition, MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher';
+import 'mapbox-gl-style-switcher/styles.css';
 import { MapboxMarkerModal } from './MapboxMarkerModal';
 import { MapboxSearchBar } from './MapboxSearchBar';
 import { MapMarker } from '../interfaces/map-marker.interfce';
@@ -11,6 +13,7 @@ class MapboxMap extends HTMLElement {
     flyToMarker: Marker;
     userMarker: Marker;
     markers: MapMarker[] = [];
+    renderCheck = false;
 
     mapboxMarkerListElement?: MapboxMarkerList | null;
     mapboxSearchBarElement: MapboxSearchBar;
@@ -54,18 +57,6 @@ class MapboxMap extends HTMLElement {
         this.map.on('load', () => {
 
             this.initMarkers();
-
-            this.add3DBuildings(this.map);
-
-            this.map.addLayer({
-                id: 'sky',
-                type: 'sky',
-                paint: {
-                    'sky-type': 'atmosphere',
-                    'sky-atmosphere-sun': [0.0, 0.0],
-                    'sky-atmosphere-sun-intensity': 15
-                }
-            });
 
             const geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
@@ -119,10 +110,59 @@ class MapboxMap extends HTMLElement {
                 'top-right'
             );
 
+            const styles: MapboxStyleDefinition[] = [
+                {
+                    title: 'Dark',
+                    uri: 'mapbox://styles/mapbox/dark-v9'
+                },
+                {
+                    title: 'Light',
+                    uri: 'mapbox://styles/mapbox/light-v9'
+                },
+                {
+                    title: 'Outdoors',
+                    uri: 'mapbox://styles/mapbox/outdoors-v11'
+                },
+                {
+                    title: 'Satellite',
+                    uri: 'mapbox://styles/mapbox/satellite-v9'
+                },
+                {
+                    title: 'Streets',
+                    uri: 'mapbox://styles/mapbox/streets-v11'
+                },
+                {
+                    title: 'Navigation Day',
+                    uri: 'mapbox://styles/mapbox/navigation-day-v1'
+                },
+                {
+                    title: 'Navigation Night',
+                    uri: 'mapbox://styles/mapbox/navigation-night-v1'
+                }
+            ];
+
+            const styleSwitcherControl = new MapboxStyleSwitcherControl(styles,
+                {
+                    defaultStyle: 'Streets',
+                    eventListeners: {
+                        onChange: (_, style: string) => {
+                            this.renderCheck = style !== 'mapbox://styles/mapbox/dark-v9' &&
+                                style !== 'mapbox://styles/mapbox/light-v9' &&
+                                style !== 'mapbox://styles/mapbox/streets-v11';
+
+                            return false;
+                        }
+                    }
+                }
+            );
+            this.map.addControl(styleSwitcherControl, 'top-right');
+
             this.map.on('dblclick', e => {
                 this.addMarker(e.lngLat.lat, e.lngLat.lng);
                 geocoder.clear();
             });
+
+            this.map.on('render', this.onMapRenderHandler);
 
             this.addEventListener('show-marker-list', this.toggleListMarkers);
         });
@@ -131,6 +171,7 @@ class MapboxMap extends HTMLElement {
 
     disconnectedCallback() {
         this.removeEventListener('show-marker-list', this.toggleListMarkers);
+        this.map.off('render', this.onMapRenderHandler);
     }
 
     add3DBuildings(map: mapboxgl.Map) {
@@ -173,6 +214,26 @@ class MapboxMap extends HTMLElement {
             labelLayerId
         );
 
+    }
+
+    addSkyLayer(map: mapboxgl.Map) {
+        map.addLayer({
+            id: 'sky',
+            type: 'sky',
+            paint: {
+                'sky-type': 'atmosphere',
+                'sky-atmosphere-sun': [0.0, 0.0],
+                'sky-atmosphere-sun-intensity': 15
+            }
+        });
+    }
+
+    onMapRenderHandler = () => {
+        if (!this.renderCheck) {
+            this.add3DBuildings(this.map);
+            this.addSkyLayer(this.map);
+            this.renderCheck = true;
+        }
     }
 
     toggleListMarkers = (e: any) => {
