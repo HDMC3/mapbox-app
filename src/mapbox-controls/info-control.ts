@@ -1,4 +1,5 @@
 import { IControl, Map } from 'mapbox-gl';
+import { MapboxInfoModal } from '../components/MapboxInfoModal';
 
 export class InfoControl implements IControl {
     private container: HTMLElement;
@@ -30,6 +31,7 @@ export class InfoControl implements IControl {
     }
 
     showModalInfo = () => {
+        document.querySelector('#main-container')?.insertAdjacentElement('afterbegin', new MapboxInfoModal());
     }
 
 }
