@@ -7,6 +7,7 @@ import { MapboxMarkerModal } from './MapboxMarkerModal';
 import { MapboxSearchBar } from './MapboxSearchBar';
 import { MapMarker } from '../interfaces/map-marker.interfce';
 import { MapboxMarkerList } from './MapboxMarkerList';
+import { InfoControl } from '../mapbox-controls/info-control';
 
 class MapboxMap extends HTMLElement {
     map: mapboxgl.Map;
@@ -162,6 +163,8 @@ class MapboxMap extends HTMLElement {
         );
 
         this.map.addControl(styleSwitcherControl, 'top-right');
+
+        this.map.addControl(new InfoControl(), 'top-right');
 
         this.map.on('dblclick', this.onMapDoubleClickHandler);
 
