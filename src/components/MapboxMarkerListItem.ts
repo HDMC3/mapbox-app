@@ -151,10 +151,10 @@ export class MapboxMarkerListItem extends HTMLElement {
         itemName.textContent = this.marker.name;
         const itemLat = document.createElement('span');
         itemLat.className = 'item-coords';
-        itemLat.textContent = 'Lat: ' + this.marker.latitude.toString();
+        itemLat.textContent = 'Lat: ' + Number(this.marker.latitude.toFixed(6)).toString();
         const itemLng = document.createElement('span');
         itemLng.className = 'item-coords';
-        itemLng.textContent = 'Lng: ' + this.marker.longitude.toString();
+        itemLng.textContent = 'Lng: ' + Number(this.marker.longitude.toFixed(6)).toString();
 
         this.shadowRoot.querySelector('.item-detail')?.insertAdjacentElement('beforeend', itemName);
         this.shadowRoot.querySelector('.item-detail')?.insertAdjacentElement('beforeend', itemLat);
