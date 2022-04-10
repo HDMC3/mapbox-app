@@ -64,6 +64,9 @@ export class MapboxInfoModal extends HTMLElement {
             padding: 5px 10px 10px 10px;
             opacity: 0;
             transition: opacity 0.2s ease-in-out;
+            box-sizing: border-box;
+            border-top: 10px solid #FFF;
+            border-bottom: 15px solid #FFF;
         }
 
         .close-button {
@@ -144,6 +147,35 @@ export class MapboxInfoModal extends HTMLElement {
             opacity: 1;
         }
 
+        .key {
+            padding: 2px 3px;
+            background-color: #64646420;
+            border-radius: 5px;
+            font-weight: bold;
+            /* box-shadow: 0px 2px 0px 0px #64646440; */
+            border: 1px solid #646464;
+        }
+
+        .image-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 150px;
+            padding: 20px 0;
+        }
+
+        img {
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .list-item-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
         @media screen and (max-width: 321px) {
             .modal-container {
                 width: 100%;
@@ -208,33 +240,82 @@ export class MapboxInfoModal extends HTMLElement {
                     <h4>Popup de marcador</h4>
                     <p>
                         Cuando das clic izquierdo sobre un marcador, se mostrara un Popup con el nombre dado al marcador 
-                        fue guardado.
+                        cuando fue guardado.
                     </p>
                 </p>
 
                 <h3 style="text-decoration: underline">Acercar / Alejar</h3>
-                <p>Puedes alejar o acercar el mapa con los controles en la parte superior derecha de la pantalla, 
-                o haciendo scroll ya sea con la rueda de un mouse, o con los gestos del touchpad. Si es un dispositivo 
-                tactil, puedes acercar o alejar el mapa con el tipico gesto de "pellizcar" la pantalla.</p>
-
-                <h3 style="text-decoration: underline">Perspectiva 3D</h3>
-                <p>Puedes tener una visualizacion de perspectiva en 3D del mapa, con la que puedes ver la elevacion de 
-                algunos edificios representados en el plano (disponible en las capas Dark, Light, y Streets). </p>
-                <p>Para acceder a esta vista puedes utilizar las siguientes opciones:</p>
+                <p>
+                    Puedes alejar o acercar el mapa con los controles  <code class="key">+</code> y <code class="key">-</code> 
+                    en la parte superior derecha de la pantalla, o con alguna de las dos siguientes acciones:
+                </p>
                 <ul>
                     <li>
-                        Utilizando teclado y mouse, manteniendo presionada la tecla <code>CTRL</code> haz click izquierdo 
-                        sobre el mapa, y manteniendo el click, arrastra para cambiar el angulo de perspectiva.
+                        <div class="list-item-container">
+                            <p style="text-align: left">
+                                Haciendo scroll con la rueda del mouse (o con el touchpad en el caso de laptops).
+                            </p>
+                            <div class="image-container">
+                                <img src="images/zoom-mouse.gif">
+                            </div>
+                        </div>
                     </li>
 
                     <li>
-                        Utilizando unicamente el mouse, puedes dar click derecho sobre el mapa, y manteniendo el click, 
-                        arrastra para cambiar el angulo de perspectiva.
+                        <div class="list-item-container">
+                            <p>
+                                En dispositivos tactiles, puedes acercar o alejar el mapa con el tipico gesto de "pellizcar" la pantalla.
+                            </p>
+                            <div class="image-container">
+                                <img src="images/zoom-touch.gif">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <h3 style="text-decoration: underline">Perspectiva 3D</h3>
+                <p>
+                    Puedes tener una visualizacion de perspectiva en 3D del mapa, con la que puedes ver la elevacion de 
+                    algunos edificios representados en el plano (disponible en las capas Dark, Light, y Streets). 
+                </p>
+                <p>
+                    Para acceder a esta vista puedes utilizar las siguientes opciones:
+                </p>
+                <ul>
+                    <li>
+                        <div class="list-item-container">
+                            <p>
+                                Utilizando teclado y mouse, manteniendo presionada la tecla <code class="key">CTRL</code> haz click izquierdo 
+                                sobre el mapa, y manteniendo el click, arrastra para cambiar el angulo de perspectiva.
+                            </p>
+                            <div class="image-container">
+                                <img src="images/3d-ctrl-mouse.gif">
+                            </div>
+                        </div>
                     </li>
 
                     <li>
-                        En dispositivos tactiles, toca la pantalla con dos dedos al mismo tiempo, y manteniendo el contacto 
-                        arrastra hacia arriba o hacia abajo para cambiar el angulo de perspectiva, luego suelta y navega por el mapa. 
+                        <div class="list-item-container">
+                            <p>
+                                Utilizando unicamente el mouse, puedes dar click derecho sobre el mapa, y manteniendo el click, 
+                                arrastra para cambiar el angulo de perspectiva.
+                            </p>
+                            <div class="image-container">
+                                <img src="images/3d-mouse.gif">
+                            </div>
+                        </div>
+                    </li>
+
+                    <li>
+                        <div class="list-item-container">
+                            <p>
+                                En dispositivos tactiles, toca la pantalla con dos dedos al mismo tiempo, y manteniendo el contacto 
+                                arrastra hacia arriba o hacia abajo para cambiar el angulo de perspectiva, luego suelta y navega por el mapa. 
+                            </p>
+                            <div class="image-container">
+                                <img src="images/3d-touch.gif">
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </div>
