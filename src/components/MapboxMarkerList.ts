@@ -149,7 +149,7 @@ export class MapboxMarkerList extends HTMLElement {
         `;
 
         const userLocationItem = new MapboxMarkerListItem({
-            name: 'Ubicacion de dispositivo',
+            name: 'Ubicación de dispositivo',
             latitude: this.markerUserLocation.getLngLat().lat,
             longitude: this.markerUserLocation.getLngLat().lng,
             mapboxMarker: this.markerUserLocation

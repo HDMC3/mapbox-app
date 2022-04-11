@@ -235,17 +235,17 @@ export class MapboxInfoModal extends HTMLElement {
         <div class="modal-container">
             <span class="close-button"></span>
             <div class="modal-header">
-                <h2>Informacion de interacciones</h2>
+                <h2>Información de interacciones</h2>
             </div>
             <div class="modal-content">
                 <h3 style="text-decoration: underline">Nuevo marcador</h3>
                 <p>
-                    Para agregar un marcador al mapa, debes dar doble click (o "doble tap" en dispositivos tactiles), 
-                    en el lugar donde deseas ubicar el marcador. Esto mostrara una ventana donde deberas escribir el nombre 
-                    con el que se guardara tu nuevo marcador.
+                    Para agregar un marcador al mapa, debes dar doble click (o "doble tap" en dispositivos táctiles),
+                    en el lugar donde deseas ubicar el marcador. Esto mostrará una ventana donde deberás escribir el nombre
+                    con el que deseas guardar tu nuevo marcador.
                     <h4>Popup de marcador</h4>
                     <p>
-                        Cuando das clic izquierdo sobre un marcador, se mostrara un Popup con el nombre dado al marcador 
+                        Cuando das clic izquierdo sobre un marcador, se mostrará un Popup con el nombre dado al marcador 
                         cuando fue guardado.
                     </p>
                 </p>
@@ -253,7 +253,7 @@ export class MapboxInfoModal extends HTMLElement {
                 <h3 style="text-decoration: underline">Acercar / Alejar</h3>
                 <p>
                     Puedes alejar o acercar el mapa con los controles  <code class="key">+</code> y <code class="key">-</code> 
-                    en la parte superior derecha de la pantalla, o con alguna de las dos siguientes acciones:
+                    ubicados en la parte superior derecha de la pantalla, o con alguna de las dos siguientes acciones:
                 </p>
                 <ul>
                     <li>
@@ -270,7 +270,7 @@ export class MapboxInfoModal extends HTMLElement {
                     <li>
                         <div class="list-item-container">
                             <p>
-                                En dispositivos tactiles, puedes acercar o alejar el mapa con el tipico gesto de "pellizcar" la pantalla.
+                                En dispositivos táctiles, puedes acercar o alejar el mapa con el típico gesto de "pellizcar" la pantalla.
                             </p>
                             <div class="image-container">
                                 <img src="images/zoom-touch.gif">
@@ -281,18 +281,18 @@ export class MapboxInfoModal extends HTMLElement {
 
                 <h3 style="text-decoration: underline">Perspectiva 3D</h3>
                 <p>
-                    Puedes tener una visualizacion de perspectiva en 3D del mapa, con la que puedes ver la elevacion de 
+                    Puedes tener una visualización de perspectiva en 3D del mapa, con la que puedes ver la elevación de 
                     algunos edificios representados en el plano (disponible en las capas Dark, Light, y Streets). 
                 </p>
                 <p>
-                    Para acceder a esta vista puedes utilizar las siguientes opciones:
+                    Para acceder a esta vista cuentas con las siguientes opciones:
                 </p>
                 <ul>
                     <li>
                         <div class="list-item-container">
                             <p>
-                                Utilizando teclado y mouse, manteniendo presionada la tecla <code class="key">CTRL</code> haz click izquierdo 
-                                sobre el mapa, y manteniendo el click, arrastra para cambiar el angulo de perspectiva.
+                                Utilizando teclado y mouse, manteniendo presionada la tecla <code class="key">CTRL</code> 
+                                haz click izquierdo sobre el mapa, y manteniendo el click, arrastra para cambiar el ángulo de perspectiva.
                             </p>
                             <div class="image-container">
                                 <img src="images/3d-ctrl-mouse.gif">
@@ -303,8 +303,8 @@ export class MapboxInfoModal extends HTMLElement {
                     <li>
                         <div class="list-item-container">
                             <p>
-                                Utilizando unicamente el mouse, puedes dar click derecho sobre el mapa, y manteniendo el click, 
-                                arrastra para cambiar el angulo de perspectiva.
+                                Utilizando únicamente el mouse, puedes dar click derecho sobre el mapa, y manteniendo el click, 
+                                arrastra para cambiar el ángulo de perspectiva.
                             </p>
                             <div class="image-container">
                                 <img src="images/3d-mouse.gif">
@@ -315,8 +315,8 @@ export class MapboxInfoModal extends HTMLElement {
                     <li>
                         <div class="list-item-container">
                             <p>
-                                En dispositivos tactiles, toca la pantalla con dos dedos al mismo tiempo, y manteniendo el contacto 
-                                arrastra hacia arriba o hacia abajo para cambiar el angulo de perspectiva, luego suelta y navega por el mapa. 
+                                En dispositivos táctiles, toca la pantalla con dos dedos al mismo tiempo, y manteniendo el contacto 
+                                arrastra hacia arriba o hacia abajo para cambiar el ángulo de perspectiva, luego suelta y navega por el mapa. 
                             </p>
                             <div class="image-container">
                                 <img src="images/3d-touch.gif">
