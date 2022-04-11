@@ -216,6 +216,12 @@ export class MapboxInfoModal extends HTMLElement {
                 width: 70%
             }
         }
+
+        @media screen and (min-width: 1024px) {
+            .modal-container {
+                width: 700px;
+            }
+        }
         `;
     }
 
