@@ -1,4 +1,6 @@
+import mapboxgl from 'mapbox-gl';
 import './MapboxMap';
+import './MapboxNotSupport';
 
 export class MapsApp extends HTMLElement {
 
@@ -12,14 +14,23 @@ export class MapsApp extends HTMLElement {
     }
 
     connectedCallback() {
-        this.render();
+        mapboxgl.accessToken = 'pk.eyJ1IjoiaGRtYyIsImEiOiJjbDFkMjBiZ3YwNzA2M2NxaW0wOXJwODdlIn0.flDOcqO3X0uzJ6prWdwVQQ';
+        const isMapboxSupported = mapboxgl.supported();
+        this.render(isMapboxSupported);
     }
 
-    render() {
-        this.innerHTML = // html
-        `
-        <mapbox-map class="map-container"></mapbox-map>
-        `;
+    render(isMapboxSupported: boolean) {
+        if (isMapboxSupported) {
+            this.innerHTML = // html
+            `
+            <mapbox-map class="map-container"></mapbox-map>
+            `;
+        } else {
+            this.innerHTML = // html
+            `
+            <mapbox-not-support></mapbox-not-support>
+            `;
+        }
     }
 };
 
