@@ -56,7 +56,7 @@ class MapboxMap extends HTMLElement {
         this.geocoder = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
             placeholder: 'Buscar...',
-            mapboxgl: mapboxgl
+            mapboxgl: this.map
         });
 
         this.mapboxSearchBarElement = new MapboxSearchBar(this.geocoder);
