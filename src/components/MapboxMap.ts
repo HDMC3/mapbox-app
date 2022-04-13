@@ -48,9 +48,11 @@ class MapboxMap extends HTMLElement {
                 .setLngLat([longitude, latitude])
                 .setPopup(
                     new Popup({ closeButton: false, className: 'shadow-popup' })
-                        .setHTML('<h3 style="margin: 0;">Mi ubicacion</h3>')
+                        .setHTML('<h3 style="margin: 0;">Ubicacion de dispositivo</h3>')
                 )
                 .addTo(this.map);
+        }, () => {
+            this.map.setCenter([-90.513231, 14.642028]);
         });
 
         this.geocoder = new MapboxGeocoder({
