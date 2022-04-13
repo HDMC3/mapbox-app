@@ -167,7 +167,28 @@ export class MapboxMarkerList extends HTMLElement {
         this.backdrop = this.shadowRoot.querySelector('.backdrop');
         this.backdrop?.addEventListener('click', this.onclickBackdropHandler);
 
-        if (!this.markerUserLocation && this.markerList?.length > 0) {
+        const markerUserLocationNotFound = this.markerUserLocation === undefined;
+        const markerListEmpty = this.markerList?.length === 0;
+
+        if (!markerUserLocationNotFound) {
+            const userLocationItem = new MapboxMarkerListItem({
+                name: 'Ubicación de dispositivo',
+                latitude: this.markerUserLocation.getLngLat().lat,
+                longitude: this.markerUserLocation.getLngLat().lng,
+                mapboxMarker: this.markerUserLocation
+            }, this.map, true, false);
+
+            this.shadowRoot.querySelector('.marker-list-container')?.insertAdjacentElement('beforeend', userLocationItem);
+        }
+
+        if (!markerListEmpty) {
+            for (const marker of this.markerList) {
+                this.shadowRoot.querySelector('.marker-list-container')
+                    ?.insertAdjacentElement('beforeend', new MapboxMarkerListItem(marker, this.map, true, true, this.markerList));
+            }
+        }
+
+        if (markerListEmpty && markerUserLocationNotFound) {
             this.shadowRoot.querySelector('marker-list-container')?.insertAdjacentHTML(
                 'beforeend',
                 /* html */ `
@@ -176,23 +197,8 @@ export class MapboxMarkerList extends HTMLElement {
                 </div>
                 `
             );
-
-            return;
         }
 
-        const userLocationItem = new MapboxMarkerListItem({
-            name: 'Ubicación de dispositivo',
-            latitude: this.markerUserLocation.getLngLat().lat,
-            longitude: this.markerUserLocation.getLngLat().lng,
-            mapboxMarker: this.markerUserLocation
-        }, this.map, true, false);
-
-        this.shadowRoot.querySelector('.marker-list-container')?.insertAdjacentElement('beforeend', userLocationItem);
-
-        for (const marker of this.markerList) {
-            this.shadowRoot.querySelector('.marker-list-container')
-                ?.insertAdjacentElement('beforeend', new MapboxMarkerListItem(marker, this.map, true, true, this.markerList));
-        }
     }
 
 }
