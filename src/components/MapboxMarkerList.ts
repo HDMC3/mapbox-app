@@ -108,7 +108,7 @@ export class MapboxMarkerList extends HTMLElement {
 
         .markers-not-found {
             display: flex;
-            padding: 10px 5px 10px 15px;
+            padding: 20px 5px 20px 15px;
             box-sizing: border-box;
             align-items: center;
             justify-content: center;
@@ -117,6 +117,7 @@ export class MapboxMarkerList extends HTMLElement {
         .markers-not-found span {
             font-size: 1.2em;
             text-align: center;
+            color: #808080
         }
         `;
     }
@@ -167,7 +168,7 @@ export class MapboxMarkerList extends HTMLElement {
         this.backdrop = this.shadowRoot.querySelector('.backdrop');
         this.backdrop?.addEventListener('click', this.onclickBackdropHandler);
 
-        const markerUserLocationNotFound = this.markerUserLocation === undefined;
+        const markerUserLocationNotFound = this.markerUserLocation.getLngLat() === undefined;
         const markerListEmpty = this.markerList?.length === 0;
 
         if (!markerUserLocationNotFound) {
@@ -189,7 +190,7 @@ export class MapboxMarkerList extends HTMLElement {
         }
 
         if (markerListEmpty && markerUserLocationNotFound) {
-            this.shadowRoot.querySelector('marker-list-container')?.insertAdjacentHTML(
+            this.shadowRoot.querySelector('.marker-list-container')?.insertAdjacentHTML(
                 'beforeend',
                 /* html */ `
                 <div class="markers-not-found">
