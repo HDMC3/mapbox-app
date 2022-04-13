@@ -105,6 +105,19 @@ export class MapboxMarkerList extends HTMLElement {
         .marker-list-header > span {
             font-size: 1.2em;
         }
+
+        .markers-not-found {
+            display: flex;
+            padding: 10px 5px 10px 15px;
+            box-sizing: border-box;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .markers-not-found span {
+            font-size: 1.2em;
+            text-align: center;
+        }
         `;
     }
 
@@ -148,6 +161,25 @@ export class MapboxMarkerList extends HTMLElement {
         </div>
         `;
 
+        this.markerListContainer = this.shadowRoot.querySelector('.marker-list-container');
+        this.markerListContainer?.addEventListener('click', this.actionButtonsHandler);
+
+        this.backdrop = this.shadowRoot.querySelector('.backdrop');
+        this.backdrop?.addEventListener('click', this.onclickBackdropHandler);
+
+        if (!this.markerUserLocation && this.markerList?.length > 0) {
+            this.shadowRoot.querySelector('marker-list-container')?.insertAdjacentHTML(
+                'beforeend',
+                /* html */ `
+                <div class="markers-not-found">
+                    <span>No se encontraron marcadores</span>
+                </div>
+                `
+            );
+
+            return;
+        }
+
         const userLocationItem = new MapboxMarkerListItem({
             name: 'Ubicación de dispositivo',
             latitude: this.markerUserLocation.getLngLat().lat,
@@ -161,12 +193,6 @@ export class MapboxMarkerList extends HTMLElement {
             this.shadowRoot.querySelector('.marker-list-container')
                 ?.insertAdjacentElement('beforeend', new MapboxMarkerListItem(marker, this.map, true, true, this.markerList));
         }
-
-        this.markerListContainer = this.shadowRoot.querySelector('.marker-list-container');
-        this.markerListContainer?.addEventListener('click', this.actionButtonsHandler);
-
-        this.backdrop = this.shadowRoot.querySelector('.backdrop');
-        this.backdrop?.addEventListener('click', this.onclickBackdropHandler);
     }
 
 }
